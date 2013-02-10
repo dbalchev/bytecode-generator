@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 
 public class Main {
 
@@ -15,9 +16,12 @@ public class Main {
      * @throws InvocationTargetException 
      * @throws IllegalAccessException 
      * @throws IllegalArgumentException 
+     * @throws SecurityException 
+     * @throws NoSuchMethodException 
      */
-    public static void main(String[] args) throws IOException, ClassNotFoundException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+    public static void main(String[] args) throws IOException, ClassNotFoundException, IllegalArgumentException, IllegalAccessException, InvocationTargetException, NoSuchMethodException, SecurityException {
         BytecodeGenerator gen = new BytecodeGenerator ();
+        ConstantStream con = gen.getConstantStream();
         short bozaClassId = gen.getConstantStream ().addConstantClass ("Boza");
         short objectClassId = gen.getConstantStream ().addConstantClass ("java/lang/Object");
         short fieldName = gen.getConstantStream ().addConstantUtf8 ("banica");
@@ -27,9 +31,24 @@ public class Main {
         short methodName = gen.getConstantStream ().addConstantUtf8 ("kifla");
         short airanName = gen.getConstantStream ().addConstantUtf8 ("airan");
         short toSName = gen.getConstantStream ().addConstantUtf8 ("toS");
-        short toSDescriptor = gen.getConstantStream ().addConstantUtf8 ("(Ljava/lang/Appendable;Ljava/lang/String;)V");
+        short toSDescriptor = gen.getConstantStream ().addConstantUtf8 ("(Ljava/lang/Appendable;Ljava/lang/Object;)V");
+        short appendableName = con.addConstantUtf8("java/lang/Appendable");
+        short appendableClass = con.addConstantClass(appendableName);
+        short appendName = con.addConstantUtf8("append");
+        short appendType = con.addConstantUtf8("(Ljava/lang/CharSequence;)Ljava/lang/Appendable;");
+        short appendTypeAndName = con.addConstantNameAndType(appendName, appendType);
+        short appendId = con.addInterfaceMethodRef(appendableClass, appendTypeAndName);
+        short toStringTAN = con.addConstantNameAndType("toString", "()Ljava/lang/String;");
+        short toStringId  = con.addMethodRef(objectClassId, toStringTAN);
         
         gen.getFieldStream ().addFieldHeader ((short) 9, fieldName, fieldDesc, (short)0);
+        gen.getMethodStream().addMethodHeader((short)9, toSName, toSDescriptor, (short)1, (short)16,(short) 16, codeId)
+        	.aload(0)
+        	.aload(1)
+        	.invokevirtual(toStringId)
+        	.invokeinterface(appendId, (byte)2)
+        	._return()
+        	.flush();
         gen.getMethodStream ().addMethodHeader ((short)9, methodName, methodDesc, (short)1, (short)16, (short)16, codeId)
             .iload (0)
             .iconst (0)
@@ -82,6 +101,9 @@ public class Main {
         for (Field f: myClass.getDeclaredFields ()) {
             System.out.println (f.getType ().toString () + " " + f.getName ());
         }
+
+    	
+        if (false) 
         for (Method m: myClass.getDeclaredMethods ()) {
             int a = 5;
             int b = 3;
@@ -89,6 +111,10 @@ public class Main {
             a = 0;
             System.out.println (m.getName () + "(" + a + ", " + b + ") = " + m.invoke (null, a, b));
         }
+        Method toS = myClass.getDeclaredMethod("toS", Appendable.class, Object.class);
+        StringBuilder sb = new StringBuilder("banica s ");
+        toS.invoke(null, sb, Arrays.asList(6.28, "boza", "pi is wrong"));
+        System.out.println(sb.toString());
         System.out.println (myClass.toString ());
     }
    

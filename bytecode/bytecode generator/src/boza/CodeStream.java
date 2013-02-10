@@ -211,6 +211,28 @@ public class CodeStream extends StreamsBase {
     	write8((byte)0);
     	return this;
     }
+    public CodeStream invokevirtual(short methodId) throws IOException {
+    	write8((byte)0xb6);
+    	write16(methodId);
+    	return this;
+    }
+    public CodeStream _return() throws IOException {
+    	write8((byte)0xb1);
+    	return this;
+    }
+    public CodeStream aload(int refId) throws IOException {
+        if (refId < 0 || refId > 255)
+            throw new IllegalArgumentException ("reference index must be >= 0");
+        if (refId < 4) {
+            byte opcode = (byte)(0x2a + refId);
+            write8(opcode);
+        } else {
+            write8((byte) 0x25);
+            write8((byte) (refId & 0xff));
+        }
+        return this;
+    }
+    
     /**
      * emits dwinm(reads the developer's thoughts and does the opposite)
      * @return

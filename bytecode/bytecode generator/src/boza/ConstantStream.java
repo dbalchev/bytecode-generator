@@ -25,11 +25,13 @@ public class ConstantStream extends StreamsBase {
      */
     public short addConstantClass(byte [] utf8bytes) throws IOException {
         short nameId = addConstantUtf8(utf8bytes);
+        return addConstantClass(nameId);
+    }
+    public short addConstantClass(short utf8id) throws IOException {
         write8 (CONSTANT_Class);
-        write16(nameId);
+        write16(utf8id);
         short classId = numConstants++;
         return classId;
-        
     }
     /**
      * adds a class constant
