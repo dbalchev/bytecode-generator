@@ -18,8 +18,10 @@ public class Main {
      * @throws IllegalArgumentException 
      * @throws SecurityException 
      * @throws NoSuchMethodException 
+     * @throws InstantiationException 
      */
-    public static void main(String[] args) throws IOException, ClassNotFoundException, IllegalArgumentException, IllegalAccessException, InvocationTargetException, NoSuchMethodException, SecurityException {
+    @SuppressWarnings({ "unused", "unchecked" })
+	public static void main(String[] args) throws IOException, ClassNotFoundException, IllegalArgumentException, IllegalAccessException, InvocationTargetException, NoSuchMethodException, SecurityException, InstantiationException {
         BytecodeGenerator gen = new BytecodeGenerator ();
         ConstantStream con = gen.getConstantStream();
         short bozaClassId = gen.getConstantStream ().addConstantClass ("Boza");
@@ -36,12 +38,35 @@ public class Main {
         short appendableClass = con.addConstantClass(appendableName);
         short appendName = con.addConstantUtf8("append");
         short appendType = con.addConstantUtf8("(Ljava/lang/CharSequence;)Ljava/lang/Appendable;");
-        short appendTypeAndName = con.addConstantNameAndType(appendName, appendType);
+        short appendTypeAndName = con.addNameAndType(appendName, appendType);
         short appendId = con.addInterfaceMethodRef(appendableClass, appendTypeAndName);
-        short toStringTAN = con.addConstantNameAndType("toString", "()Ljava/lang/String;");
+        short toStringTAN = con.addNameAndType("toString", "()Ljava/lang/String;");
         short toStringId  = con.addMethodRef(objectClassId, toStringTAN);
+        short initId = con.addConstantUtf8("<init>");
+        short constructorDec = con.addConstantUtf8("(D)V");
+        short constructorId = con.addMethodRef(bozaClassId, con.addNameAndType("<init>", "(D)V"));
+        short banicaId = con.addFieldRef(bozaClassId, con.addNameAndType(fieldName, fieldDesc));
+        short getSqName = con.addConstantUtf8("getSq");
+        short getSqDesc = con.addConstantUtf8("()D");
+        short objectConstructorId = con.addMethodRef(objectClassId, con.addNameAndType("<init>", "()V"));
+        //sorry for the long definition
         
-        gen.getFieldStream ().addFieldHeader ((short) 9, fieldName, fieldDesc, (short)0);
+        gen.getFieldStream ().addFieldHeader ((short) 2, fieldName, fieldDesc, (short)0);
+        gen.getMethodStream().addMethodHeader((short)1, initId, constructorDec, (short)1, (short)16, (short)16, codeId)
+        	.aload(0)
+        	.dup()
+        	.invokespecial(objectConstructorId)
+        	.dload(1)
+        	.putfield(banicaId)
+        	._return()
+        	.flush();
+        gen.getMethodStream().addMethodHeader((short)1, getSqName, getSqDesc, (short)1,  (short)16, (short)16, codeId)
+        	.aload(0)
+        	.getfield(banicaId)
+        	.dup2()
+        	.dmul()
+        	.dreturn()
+        	.flush();
         gen.getMethodStream().addMethodHeader((short)9, toSName, toSDescriptor, (short)1, (short)16,(short) 16, codeId)
         	.aload(0)
         	.aload(1)
@@ -114,6 +139,9 @@ public class Main {
         Method toS = myClass.getDeclaredMethod("toS", Appendable.class, Object.class);
         StringBuilder sb = new StringBuilder("banica s ");
         toS.invoke(null, sb, Arrays.asList(6.28, "boza", "pi is wrong"));
+        Object bozaObj = myClass.getConstructor(double.class).newInstance(6.28);
+        double sq = (Double) myClass.getDeclaredMethod("getSq").invoke(bozaObj);
+        System.out.println("sq = " + sq);
         System.out.println(sb.toString());
         System.out.println (myClass.toString ());
     }

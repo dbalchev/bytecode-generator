@@ -13,6 +13,15 @@ import java.util.Vector;
  * most(all?) undocumented methods emit instruction opcode. check http://docs.oracle.com/javase/specs/jvms/se7/html/jvms-6.html
  * Note: changes are not written until flush
  * Note2: all instruction emiters and the label generator return this to allow chaining
+ * 
+ * the instruction emiting methods are defined this way:
+ * 	  - the name of the method is the instruction mnemonic (if possible)
+ *    - if there are 2 or more semanticaly equal instructions the method should choose which to use (example iload_* and iload)
+ *    - if there is a branch target or another offset/address in the code, there should be a label overload (there the target is specified by a label, not absolute/relative address)
+ *    - all instruction parameters (immediate operands?) should be method parameters
+ *    - must return this object (to allow chaining)
+ *    - if trivial error checking is possible it must be implemented
+ *     
  * @author dani
  * 
  */
@@ -216,8 +225,52 @@ public class CodeStream extends StreamsBase {
     	write16(methodId);
     	return this;
     }
+    public CodeStream invokespecial(short methodId) throws IOException {
+    	write8((byte)0xb7);
+    	write16(methodId);
+    	return this;
+    }
+    public CodeStream putfield(short fieldId) throws IOException {
+    	write8((byte)0xb5);
+    	write16(fieldId);
+    	return this;
+    }
+    public CodeStream getfield(short fieldId) throws IOException {
+    	write8((byte)0xb4);
+    	write16(fieldId);
+    	return this;
+    }
     public CodeStream _return() throws IOException {
     	write8((byte)0xb1);
+    	return this;
+    }
+
+    public CodeStream dload(int refId) throws IOException {
+        if (refId < 0 || refId > 255)
+            throw new IllegalArgumentException ("reference index must be >= 0");
+        if (refId < 4) {
+            byte opcode = (byte)(0x26 + refId);
+            write8(opcode);
+        } else {
+            write8((byte) 0x18);
+            write8((byte) (refId & 0xff));
+        }
+        return this;
+    }
+    public CodeStream dmul() throws IOException {
+    	write8((byte)0x6b);
+    	return this;
+    }
+    public CodeStream dup2() throws IOException {
+    	write8((byte)0x5c);
+    	return this;
+    }
+    public CodeStream dup() throws IOException {
+    	write8((byte)0x59);
+    	return this;
+    }
+    public CodeStream dreturn() throws IOException {
+    	write8((byte)0xaf);
     	return this;
     }
     public CodeStream aload(int refId) throws IOException {

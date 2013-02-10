@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 /**
  * a class managing the constant pool of a classfile
+ * TODO add at least string(utf8 entry) cache
  * @author dani
  *
  */
@@ -36,7 +37,7 @@ public class ConstantStream extends StreamsBase {
     /**
      * adds a class constant
      * @param name the name of the class
-     * @return returns the index of the newlycreated constant in this constant pool
+     * @return returns the index of the newly created constant in this constant pool
      */
     public short addConstantClass(String name) throws IOException {
         return addConstantClass (name.getBytes ("Utf-8"));
@@ -58,7 +59,7 @@ public class ConstantStream extends StreamsBase {
     /**
      * adds an UTF-8 constant
      * @param value the value of the constant
-     * @return returns the index of the newlycreated constant in this constant pool
+     * @return returns the index of the newly created constant in this constant pool
      */
     public short addConstantUtf8(String value) throws IOException {
         return addConstantUtf8 (value.getBytes ("Utf-8"));
@@ -66,7 +67,7 @@ public class ConstantStream extends StreamsBase {
     /**
      * adds an UTF-8 constant 
      * @param bytes an array holding the data for this constant
-     * @return returns the index of the newlycreated constant in this constant pool
+     * @return returns the index of the newly created constant in this constant pool
      */
     public short addConstantUtf8(byte[] bytes) throws IOException {
         write8(CONSTANT_Utf8);
@@ -79,7 +80,7 @@ public class ConstantStream extends StreamsBase {
     /**
      * adds an integer constant 
      * @param c the value of the constant
-     * @return returns the index of the newlycreated constant in this constant pool
+     * @return returns the index of the newly created constant in this constant pool
      */
     public short addConstantInt(int c) throws IOException {
         write8(CONSTANT_Integer);
@@ -87,15 +88,15 @@ public class ConstantStream extends StreamsBase {
         short intId = numConstants++;
         return intId;
     }
-    public short addConstantNameAndType(short nameId, short typeId) throws IOException {
+    public short addNameAndType(short nameId, short typeId) throws IOException {
     	write8(CONSTANT_NameAndType);
     	write16(nameId);
     	write16(typeId);
     	short rezId = numConstants++;
     	return rezId;
     }
-    public short addConstantNameAndType(String name, String type) throws IOException {
-    	return addConstantNameAndType(addConstantUtf8(name), addConstantUtf8(type));
+    public short addNameAndType(String name, String type) throws IOException {
+    	return addNameAndType(addConstantUtf8(name), addConstantUtf8(type));
     }
     public short addFieldRef(short classId, short nameAndTypeId) throws IOException {
     	write8(CONSTANT_Fieldref);
