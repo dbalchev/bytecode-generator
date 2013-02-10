@@ -26,6 +26,8 @@ public class Main {
         short methodDesc = gen.getConstantStream ().addConstantUtf8 ("(II)I");
         short methodName = gen.getConstantStream ().addConstantUtf8 ("kifla");
         short airanName = gen.getConstantStream ().addConstantUtf8 ("airan");
+        short toSName = gen.getConstantStream ().addConstantUtf8 ("toS");
+        short toSDescriptor = gen.getConstantStream ().addConstantUtf8 ("(Ljava/lang/Appendable;Ljava/lang/String;)V");
         
         gen.getFieldStream ().addFieldHeader ((short) 9, fieldName, fieldDesc, (short)0);
         gen.getMethodStream ().addMethodHeader ((short)9, methodName, methodDesc, (short)1, (short)16, (short)16, codeId)

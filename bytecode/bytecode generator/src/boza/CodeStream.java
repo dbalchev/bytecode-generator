@@ -204,6 +204,13 @@ public class CodeStream extends StreamsBase {
         }
         return this;
     }
+    public CodeStream invokeinterface(short methodId, byte count) throws IOException {
+    	write8((byte)0xb9);
+    	write16(methodId);
+    	write8(count);
+    	write8((byte)0);
+    	return this;
+    }
     /**
      * emits dwinm(reads the developer's thoughts and does the opposite)
      * @return

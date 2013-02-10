@@ -25,9 +25,9 @@ public class ConstantStream extends StreamsBase {
      */
     public short addConstantClass(byte [] utf8bytes) throws IOException {
         short nameId = addConstantUtf8(utf8bytes);
-        short classId = numConstants++;
         write8 (CONSTANT_Class);
         write16(nameId);
+        short classId = numConstants++;
         return classId;
         
     }
@@ -47,10 +47,10 @@ public class ConstantStream extends StreamsBase {
      */
     public short addConstantString(String value) throws IOException {
         short utf8Id = addConstantUtf8 (value.getBytes ("Utf-8"));
-        short stringId = numConstants++;
         write8(CONSTANT_String);
         write16(utf8Id);
 
+        short stringId = numConstants++;
         return stringId;
     }
     /**
@@ -67,11 +67,11 @@ public class ConstantStream extends StreamsBase {
      * @return returns the index of the newlycreated constant in this constant pool
      */
     public short addConstantUtf8(byte[] bytes) throws IOException {
-        short utf8Id   = numConstants++;
         write8(CONSTANT_Utf8);
         byte[] utf8 = bytes;
         write16((short)utf8.length);
         out.write (utf8);
+        short utf8Id   = numConstants++;
         return utf8Id;
     }
     /**
@@ -80,10 +80,41 @@ public class ConstantStream extends StreamsBase {
      * @return returns the index of the newlycreated constant in this constant pool
      */
     public short addConstantInt(int c) throws IOException {
-        short intId = numConstants++;
         write8(CONSTANT_Integer);
         write32(c);
+        short intId = numConstants++;
         return intId;
+    }
+    public short addConstantNameAndType(short nameId, short typeId) throws IOException {
+    	write8(CONSTANT_NameAndType);
+    	write16(nameId);
+    	write16(typeId);
+    	short rezId = numConstants++;
+    	return rezId;
+    }
+    public short addConstantNameAndType(String name, String type) throws IOException {
+    	return addConstantNameAndType(addConstantUtf8(name), addConstantUtf8(type));
+    }
+    public short addFieldRef(short classId, short nameAndTypeId) throws IOException {
+    	write8(CONSTANT_Fieldref);
+    	write16(classId);
+    	write16(nameAndTypeId);
+    	
+    	return numConstants++;
+    }
+    public short addMethodRef(short classId, short nameAndTypeId) throws IOException {
+    	write8(CONSTANT_Methodref);
+    	write16(classId);
+    	write16(nameAndTypeId);
+    	
+    	return numConstants++;
+    }
+    public short addInterfaceMethodRef(short classId, short nameAndTypeId) throws IOException {
+    	write8(CONSTANT_InterfaceMethodref);
+    	write16(classId);
+    	write16(nameAndTypeId);
+    	
+    	return numConstants++;
     }
     /**
      * crashes the host machine
